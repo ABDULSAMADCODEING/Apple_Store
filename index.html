@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --apple-blue: #0071e3;
+            --apple-blue-hover: #0077ed;
+            --text-dark: #1d1d1f;
+            --bg-light: #f5f5f7;
+            --nav-height: 44px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #fff;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- SINGLE PAGE ROUTING STYLES --- */
+        .page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            min-height: 100vh;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* --- NAVBAR --- */
+        .apple-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            z-index: 9999;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.16);
+        }
+
+        .nav-content {
+            max-width: 1024px;
+            margin: 0 auto;
+            height: 100%;
+            padding: 0 22px;
+        }
+
+        .nav-items {
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .nav-items li a {
+            text-decoration: none;
+            color: rgba(0, 0, 0, 0.8);
+            padding: 0 8px;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-items li a:hover, .nav-items li a.active-link {
+            color: #000;
+        }
+
+        /* Icons */
+        .nav-icon svg, .nav-icon i { fill: rgba(0,0,0,0.8); width: 15px; display: block; }
+        .nav-icon:hover svg, .nav-icon:hover i { fill: #000; color: #000; }
+
+        /* --- SEARCH OVERLAY --- */
+        #searchOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: #fff;
+            z-index: 10000;
+            overflow: hidden;
+            transition: height 0.3s ease-in-out;
+            padding: 0 20px;
+        }
+
+        #searchOverlay.active { height: 100vh; }
+
+        .search-container-inner {
+            max-width: 800px;
+            margin: 100px auto;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #d2d2d7;
+            padding-bottom: 10px;
+        }
+
+        .search-input-wrapper input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 24px;
+            padding-left: 15px;
+            font-weight: 500;
+        }
+
+        .close-search {
+            cursor: pointer;
+            font-size: 24px;
+            color: #1d1d1f;
+        }
+
+        /* --- SHARED COMPONENTS --- */
+        .section-container { text-align: center; padding: 100px 20px; }
+        h1 { font-size: 56px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.02em; }
+        h2 { font-size: 28px; font-weight: 400; margin-bottom: 20px; }
+        .cta-links { display: flex; justify-content: center; gap: 20px; }
+        .btn { padding: 11px 21px; border-radius: 980px; text-decoration: none; font-size: 17px; transition: 0.3s; }
+        .btn-blue { background: var(--apple-blue); color: white; }
+        .btn-outline { color: var(--apple-blue); border: 1px solid var(--apple-blue); }
+        .btn-outline:hover { background: var(--apple-blue); color: white; }
+
+        /* --- MAC & SUPPORT GRID --- */
+        .mac-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 1200px; margin: 50px auto; gap: 20px; padding: 20px; }
+        .mac-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+            transition: transform 0.3s ease;
+        }
+        .mac-card:hover { transform: translateY(-5px); }
+        .mac-card.hidden { display: none; }
+
+        /* --- SUPPORT PAGE SEARCH --- */
+        .support-page { background: #fff; padding-top: 100px; }
+        .support-search-wrapper {
+            max-width: 600px;
+            margin: 40px auto;
+            position: relative;
+        }
+        .support-search-wrapper i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #86868b;
+        }
+        .support-search-input {
+            width: 100%;
+            padding: 18px 20px 18px 50px;
+            background: #f5f5f7;
+            border-radius: 12px;
+            font-size: 19px;
+            border: none;
+            outline-color: var(--apple-blue);
+        }
+
+        /* --- ANIMATIONS --- */
+        .slide-up { animation: slideUp 0.8s ease forwards; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 38px; }
+            .nav-link { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- GLOBAL SEARCH OVERLAY -->
+    <div id="searchOverlay">
+        <div class="search-container-inner">
+            <div class="search-input-wrapper">
+                <i class="fa fa-search" style="font-size: 20px; color: #86868b;"></i>
+                <input type="text" placeholder="Search apple.com" id="globalSearchInput">
+                <i class="fa fa-times close-search" onclick="toggleSearch()"></i>
+            </div>
+            <div style="margin-top: 30px;">
+                <p style="font-size: 12px; color: #86868b; text-transform: uppercase; margin-bottom: 15px;">Quick Links</p>
+                <ul style="list-style: none;">
+                    <li style="padding: 8px 0;"><a onclick="navigateTo('support'); toggleSearch()" style="color: #1d1d1f; text-decoration: none; cursor: pointer;">Find a Store</a></li>
+                    <li style="padding: 8px 0;"><a onclick="navigateTo('iphone'); toggleSearch()" style="color: #1d1d1f; text-decoration: none; cursor: pointer;">iPhone Accessories</a></li>
+                    <li style="padding: 8px 0;"><a onclick="navigateTo('watch'); toggleSearch()" style="color: #1d1d1f; text-decoration: none; cursor: pointer;">AirPods</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="apple-nav">
+        <div class="nav-content">
+            <ul class="nav-items">
+                <li><a onclick="navigateTo('home')" class="nav-icon"><svg viewBox="0 0 17 17"><path d="M15.078 11.23c0 2.228 1.956 2.972 2.043 3.016-.01.036-.316 1.08-1.042 2.144-.65 1.03-1.42 1.95-2.56 1.95-1.12 0-1.48-.66-2.76-.66-1.29 0-1.68.64-2.74.64-1.1 0-1.95-1.1-2.66-2.13-1.45-2.1-2.55-5.95-1.07-8.52.73-1.28 2.04-2.09 3.47-2.09 1.08 0 2.1.73 2.76.73.66 0 1.9-.9 3.2-.77.54.02 2.06.22 3.03 1.64-.07.05-1.8 1.05-1.8 4.02zM11.66 1.6c.58-.7 1-1.66 1-2.54 0-.06-.01-.13-.02-.18-.94.04-2.08.63-2.76 1.44-.52.6-.97 1.57-.97 2.47 0 .07.01.14.02.18.94-.07 2.15-.7 2.73-1.37z"/></svg></a></li>
+                <li class="nav-link"><a onclick="navigateTo('store')">Store</a></li>
+                <li class="nav-link"><a onclick="navigateTo('mac')">Mac</a></li>
+                <li class="nav-link"><a onclick="navigateTo('iphone')">iPhone</a></li>
+                <li class="nav-link"><a onclick="navigateTo('watch')">Watch</a></li>
+                <li class="nav-link"><a onclick="navigateTo('support')">Support</a></li>
+                <li><a class="nav-icon" onclick="toggleSearch()"><i class="fa fa-search"></i></a></li>
+                <li><a class="nav-icon"><i class="fa fa-shopping-bag"></i></a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- PAGE: HOME -->
+    <main id="home" class="page active">
+        <section class="section-container iphone-home">
+            <div class="slide-up">
+                <h1>iPhone 16 Pro</h1>
+                <h2>Hello, Apple Intelligence.</h2>
+                <div class="cta-links">
+                    <a class="btn btn-blue">Learn more</a>
+                    <a class="btn btn-outline">Buy</a>
+                </div>
+                <img src="./apple5.png" alt="iPhone 16">
+            </div>
+        </section>
+    </main>
+
+    <!-- PAGE: STORE -->
+    <main id="store" class="page">
+        <section class="section-container">
+            <h1 style="text-align: left; max-width: 1000px; margin: 0 auto;">
+                <span style="color: #86868b;">Store.</span> The best way to buy the products you love.
+            </h1>
+            <div class="mac-grid">
+                <div class="mac-card"><h3>MacBook Pro</h3><p>From $1,69,900</p></div>
+                <div class="mac-card"><h3>iPhone 16</h3><p>From $79,900</p></div>
+                <div class="mac-card"><h3>iPad Pro</h3><p>From 99,900</p></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- PAGE: MAC -->
+    <main id="mac" class="page">
+        <section class="section-container mac-page">
+            <h1>Mac</h1>
+            <h2>If you can dream it, Mac can do it.</h2>
+            <div class="mac-grid">
+                <div class="mac-card">
+                    <img src="./apple6.jpg" alt="" style="width: 100%">
+                    <h3>MacBook Pro</h3>
+                    <p>Mind-blowing. Head-turning.</p>
+                </div>
+                <div class="mac-card">
+                    <img src="./apple7.png" alt="" style="width: 100%">
+                    <h3>MacBook Air</h3>
+                    <p>Lean. Mean. M3 machine.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- PAGE: IPHONE -->
+    <main id="iphone" class="page">
+        <section class="section-container">
+            <h1>iPhone</h1>
+            <h2>Designed to be loved.</h2>
+            <img src="./apple3.png" alt="iPhone" style="max-width: 500px;">
+        </section>
+    </main>
+
+    <!-- PAGE: WATCH -->
+    <main id="watch" class="page">
+        <section class="section-container">
+            <h1 class="product-logo"><i class="fa-brands fa-apple"></i> WATCH</h1>
+            <h2>Thinstant classic.</h2>
+            <img src="./apple2.png" alt="Watch" style="max-width: 600px;">
+        </section>
+    </main>
+
+    <!-- PAGE: SUPPORT -->
+    <main id="support" class="page">
+        <section class="section-container support-page">
+            <h1>Apple Support</h1>
+            
+            <div class="support-search-wrapper">
+                <i class="fa fa-search"></i>
+                <input type="text" class="support-search-input" id="supportSearch" placeholder="Search support (try 'Mac' or 'iPhone')">
+            </div>
+
+            <div class="mac-grid" id="supportGrid">
+                <div class="mac-card support-item" data-name="mac">
+                    <i class="fa fa-laptop" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>Mac</h3>
+                </div>
+                <div class="mac-card support-item" data-name="iphone">
+                    <i class="fa fa-mobile-screen" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>iPhone</h3>
+                </div>
+                <div class="mac-card support-item" data-name="watch">
+                    <i class="fa fa-clock" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>Watch</h3>
+                </div>
+                <div class="mac-card support-item" data-name="ipad">
+                    <i class="fa fa-tablet-screen-button" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>iPad</h3>
+                </div>
+                <div class="mac-card support-item" data-name="music">
+                    <i class="fa fa-music" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>Music</h3>
+                </div>
+                <div class="mac-card support-item" data-name="billing">
+                    <i class="fa fa-credit-card" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>Billing</h3>
+                </div>
+                   <div class="mac-grid" id="supportGrid">
+                <div class="mac-card support-item" data-name="mac">
+                    <i class="fa fa-laptop" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>Mac</h3>
+                </div>
+                <div class="mac-card support-item" data-name="iphone">
+                    <i class="fa fa-mobile-screen" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>iPhone</h3>
+                </div>
+                <div class="mac-card support-item" data-name="watch">
+                    <i class="fa fa-clock" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>Watch</h3>
+                </div>
+                <div class="mac-card support-item" data-name="ipad">
+                    <i class="fa fa-tablet-screen-button" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>iPad</h3>
+                </div>
+                <div class="mac-card support-item" data-name="music">
+                    <i class="fa fa-music" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>Music</h3>
+                </div>
+                <div class="mac-card support-item" data-name="billing">
+                    <i class="fa fa-credit-card" style="font-size: 40px; margin-bottom: 15px;"></i>
+                    <h3>Billing</h3>
+                </div>
+            </div>
+            
+            <p id="noResults" style="display: none; color: #86868b; margin-top: 20px;">No support categories found.</p>
+        </section>
+    </main>
+
+    <script>
+        // 1. Navigation Logic
+        function navigateTo(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+
+            const selectedPage = document.getElementById(pageId);
+            if (selectedPage) {
+                selectedPage.classList.add('active');
+                window.scrollTo(0, 0);
+            }
+
+            const links = document.querySelectorAll('.nav-items li a');
+            links.forEach(link => {
+                link.classList.remove('active-link');
+                if (link.innerText.toLowerCase() === pageId) {
+                    link.classList.add('active-link');
+                }
+            });
+        }
+
+        // 2. Navbar Global Search Toggle
+        function toggleSearch() {
+            const overlay = document.getElementById('searchOverlay');
+            overlay.classList.toggle('active');
+            if (overlay.classList.contains('active')) {
+                document.getElementById('globalSearchInput').focus();
+            }
+        }
+
+        // 3. Real-time Search Logic for Support Page
+        const searchInput = document.getElementById('supportSearch');
+        const supportItems = document.querySelectorAll('.support-item');
+        const noResults = document.getElementById('noResults');
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            let hasResults = false;
+
+            supportItems.forEach(item => {
+                const itemName = item.getAttribute('data-name');
+                const itemTitle = item.querySelector('h3').innerText.toLowerCase();
+                
+                if (itemName.includes(searchTerm) || itemTitle.includes(searchTerm)) {
+                    item.classList.remove('hidden');
+                    hasResults = true;
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+
+            noResults.style.display = hasResults ? 'none' : 'block';
+        });
+
+        // Initialize with home page
+        window.onload = () => navigateTo('home');
+    </script>
+</body>
+</html>
